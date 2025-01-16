@@ -1,5 +1,6 @@
 package org.shoppingcart.controller;
 
+import org.shoppingcart.dto.ProductDTO;
 import org.shoppingcart.model.Product;
 import org.shoppingcart.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public List<Product> getAllProducts() {
+    public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
 

@@ -1,4 +1,5 @@
 package org.shoppingcart.service;
+import org.shoppingcart.dto.ProductDTO;
 import org.shoppingcart.model.Product;
 import org.shoppingcart.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -15,8 +19,13 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public List<Product> getAllProducts(){
-        return productRepository.findAll();
+
+
+    public List<ProductDTO> getAllProducts(){
+        return productRepository.findAll()
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     public ResponseEntity<Product> getProductById(Long id){
@@ -24,7 +33,7 @@ public class ProductService {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
+    
     public Product createProduct(Product product){
         return productRepository.save(product);
     }
@@ -44,6 +53,15 @@ public class ProductService {
             product.setDescription(updatedProduct.getDescription());
             return ResponseEntity.ok(productRepository.save(product));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    private ProductDTO convertToDto(Product product){
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
+        productDTO.setName(product.getName());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setPrice(product.getPrice());
+        return productDTO;
     }
 
 }

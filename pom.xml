@@ -27,6 +27,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.shoppingcart</groupId>
+            <artifactId>KafkaThird</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!-- Spring Boot Starter for JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -57,7 +62,10 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <!-- Spring Boot DevTools (for development only) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
