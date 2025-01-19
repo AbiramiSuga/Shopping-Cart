@@ -1,7 +1,5 @@
 package org.shoppingcart.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shoppingcart.event.PaymentEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,8 +30,6 @@ public class OrderService {
     @Autowired
     private CartRepository cartRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
     public void processOrder(Long cartId) {
         Optional<org.shoppingcart.model.Cart> cartOpt = cartRepository.findById(cartId);
