@@ -8,7 +8,8 @@ This is a **Spring Boot**-based Shopping Cart application that allows users to b
 - **Cart Management**: Add and remove products from the cart.  
 - **Order Processing**: Place an order and send details via Kafka.  
 - **Logging**: Uses **Logback** for structured and efficient logging.  
-- **Dockerized**: The application runs in a Docker container (excluding Kafka).
+- **Dockerized**: The application runs in Docker containers for both the Spring Boot app and PostgreSQL database(excluding Kafka).
+
 ---
 
 ## Docker Setup  
@@ -58,35 +59,25 @@ cd shopping-cart
 git checkout docker_exp
 ```
 
-### **Build and Run the Application**  
+### **Docker Compose Setup**  
+
+Make sure you have Docker Compose installed. Then, follow these steps to run the application using Docker Compose.
+
+1. **Build and Run the Containers**  
 ```sh
-# Build the Docker image
-docker build -t shopping-cart-app .
-
-# Run the PostgreSQL locally
-or
-# Create a container and run
-docker run --name shopping-cart-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=shopping_cart -p 5432:5432 -d postgres
-
-# Run the application container
-docker run --name shopping-cart-app --link shopping-cart-db -p 8083:8083 shopping-cart-app
+# Start all services (shopping-cart-app & shopping-cart-db)
+docker-compose up --build
 ```
 
-### **Verify Running Containers**  
+This will:
+- Build the `shopping-cart-app` Docker image (if not already built).
+- Start the PostgreSQL container (`shopping-cart-db`).
+- Start the Spring Boot application container (`shopping-cart-app`).
+
+2. **Verify Running Containers**  
 ```sh
 docker ps
 ```
 
 ### **Access the Application**  
 - **API Base URL**: `http://localhost:8083/`  
-- **PostgreSQL DB**: Connect using `docker exec -it shopping-cart-db psql -U postgres -d shopping_cart`
-
----
-
-
----
-
-
-
-
-
