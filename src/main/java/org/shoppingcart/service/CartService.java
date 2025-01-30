@@ -27,7 +27,9 @@ public class CartService {
         this.cartProductRepository = cartProductRepository;
     }
 
-    public Cart createCart(Cart cart) {
+    public Cart createCart(Long id) {
+        Cart cart=new Cart();
+        cart.setUserId(id);
         return cartRepository.save(cart);
     }
 
@@ -40,13 +42,14 @@ public class CartService {
         if (cart.isPresent()) {
             Cart existingCart = cart.get();
             // Calculate total price if not set
-            if (existingCart.getTotalPrice() == null) {
-                double totalPrice = existingCart.getCartProducts().stream()
-                        .mapToDouble(cp -> cp.getProduct().getPrice() * cp.getQuantity())
-                        .sum();
+//            if (existingCart.getTotalPrice() == 0) {
+                double totalPrice = calculateTotalPrice(existingCart);
                 existingCart.setTotalPrice(totalPrice);
+                cartRepository.save(existingCart);
+                System.out.println("===========================>"+totalPrice);
                 cartRepository.save(existingCart); // Save updated cart with total price
-            }
+//            }
+
             return ResponseEntity.ok(existingCart);
         }
         return ResponseEntity.notFound().build();
@@ -72,26 +75,47 @@ public class CartService {
 
     @Transactional
     public ResponseEntity<Cart> addProductToCart(Long cartId, Long productId, Integer quantity) {
-        Optional<Cart> cart = cartRepository.findById(cartId);
-        Optional<Product> product = productRepository.findById(productId);
+        Optional<Cart> cartOpt = cartRepository.findById(cartId);
+        Optional<Product> productOpt = productRepository.findById(productId);
 
-        if (cart.isPresent() && product.isPresent()) {
-            CartProductKey cartProductKey = new CartProductKey(cartId, productId);
-            CartProduct cartProduct = new CartProduct();
-            cartProduct.setId(cartProductKey);
-            cartProduct.setCart(cart.get());
-            cartProduct.setProduct(product.get());
-            cartProduct.setQuantity(quantity);
+        if (cartOpt.isPresent() && productOpt.isPresent()) {
+            Cart cart = cartOpt.get();
+            Product product = productOpt.get();
 
-            cartProductRepository.save(cartProduct);
+            // Check if the product already exists in the cart
+            CartProduct existingCartProduct = cart.getCartProducts().stream()
+                    .filter(cp -> cp.getProduct().getId().equals(productId))
+                    .findFirst()
+                    .orElse(null);
 
-            cart.get().setTotalPrice(cart.get().getTotalPrice() + (product.get().getPrice() * quantity));
-            cartRepository.save(cart.get());
 
-            return ResponseEntity.ok(cart.get());
+            if (existingCartProduct != null) {
+                // Update the quantity of the existing product
+                existingCartProduct.setQuantity(existingCartProduct.getQuantity() + quantity);
+                cartProductRepository.save(existingCartProduct);
+            } else {
+                // Add new CartProduct if it doesn't already exist
+                CartProductKey cartProductKey = new CartProductKey(cartId, productId);
+                CartProduct newCartProduct = new CartProduct();
+                newCartProduct.setId(cartProductKey);
+                newCartProduct.setCart(cart);
+                newCartProduct.setProduct(product);
+                newCartProduct.setQuantity(quantity);
+
+                cartProductRepository.save(newCartProduct);
+            }
+
+            // Recalculate total price
+            double newTotalPrice = calculateTotalPrice(cart);
+            cart.setTotalPrice(newTotalPrice);
+            cartRepository.save(cart);
+
+            return ResponseEntity.ok(cart);
         }
+
         return ResponseEntity.notFound().build();
     }
+
 
     @Transactional
     public ResponseEntity<Cart> removeProductFromCart(Long cartId, Long productId) {
@@ -112,5 +136,10 @@ public class CartService {
             return ResponseEntity.ok(cart.get());
         }
         return ResponseEntity.notFound().build();
+    }
+    private double calculateTotalPrice(Cart cart) {
+        return cart.getCartProducts().stream()
+                .mapToDouble(cp -> cp.getProduct().getPrice() * cp.getQuantity())
+                .sum();
     }
 }

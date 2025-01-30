@@ -18,9 +18,9 @@ public class CartController {
 
 
     // Create a new cart
-    @PostMapping
-    public ResponseEntity<Cart> createCart(@RequestBody Cart cart) {
-        return ResponseEntity.ok(cartService.createCart(cart));
+    @PostMapping("/{id}")
+    public ResponseEntity<Cart> createCart(@PathVariable Long id) {
+        return ResponseEntity.ok(cartService.createCart(id));
     }
 
     // Get all carts
