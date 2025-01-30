@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  shopping-cart-db:
+    image: postgres
+    container_name: shopping-cart-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abg@1234
+      POSTGRES_DB: shopping_cart
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  shopping-cart-app:
+    build: .
+    container_name: shopping-cart-app-compose
+    restart: always
+    ports:
+      - "8083:8083"
+    depends_on:
+      - shopping-cart-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://shopping-cart-db:5432/shopping_cart
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: abg@1234
+
+volumes:
+  pgdata:
+    driver: local
