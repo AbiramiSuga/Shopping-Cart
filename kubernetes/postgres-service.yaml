@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopping-cart-db  # This is the hostname your app will use
+spec:
+  selector:
+    app: shopping-cart-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
