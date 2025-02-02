@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    service: zookeeper
+  name: zookeeper
+spec:
+  serviceName: zookeeper
+  replicas: 1
+  selector:
+    matchLabels:
+      service: zookeeper
+  template:
+    metadata:
+      labels:
+        service: zookeeper
+    spec:
+      securityContext:
+        fsGroup: 1000
+      enableServiceLinks: false
+      containers:
+        - name: zookeeper
+          imagePullPolicy: IfNotPresent
+          image: wurstmeister/zookeeper:latest
+          ports:
+            - containerPort: 2181
+          env:
+            - name: ZOOKEEPER_SERVER_ID
+              value: "1"
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/zookeeper
+              name: zookeeper-data
+      hostname: zookeeper
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: zookeeper-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: zookeeper
+  name: zookeeper
+spec:
+  ports:
+    - name: "2181"
+      port: 2181
+      targetPort: 2181
+  selector:
+    service: zookeeper
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    service: kafka
+  name: kafka
+spec:
+  serviceName: kafka
+  replicas: 1
+  selector:
+    matchLabels:
+      service: kafka
+  template:
+    metadata:
+      labels:
+        service: kafka
+    spec:
+      securityContext:
+        fsGroup: 1000
+      enableServiceLinks: false
+      containers:
+        - name: kafka
+          imagePullPolicy: IfNotPresent
+          image: bitnami/kafka:latest
+          ports:
+            - containerPort: 29092
+            - containerPort: 9092
+          env:
+
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "INTERNAL://kafka-0:29092,LISTENER_EXTERNAL://localhost:9092"
+            - name: KAFKA_LISTENERS
+              value: "INTERNAL://0.0.0.0:29092,LISTENER_EXTERNAL://0.0.0.0:9092"
+
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT"
+
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "INTERNAL"
+
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "zookeeper:2181"
+
+            # Auto-creation of topics in Kafka
+            - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+              value: "true"
+
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/kafka/
+              name: kafka-data
+      hostname: kafka
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    service: kafka
+spec:
+  ports:
+    - name: kafka-9092   # Added name to port 9092
+      port: 9092
+      targetPort: 9092
+    - name: kafka-29092  # Added name to port 29092
+      port: 29092
+      targetPort: 29092
+  clusterIP: None
+  selector:
+    service: kafka

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopping-cart-app
+spec:
+  replicas: 3  # Deploy 3 replicas
+  selector:
+    matchLabels:
+      app: shopping-cart
+  template:
+    metadata:
+      labels:
+        app: shopping-cart
+    spec:
+      containers:
+        - name: shopping-cart-app
+          image: ramisuga/shopping-cart-shopping-cart-app:latest  # Your actual image
+          ports:
+            - containerPort: 8083  # Ensure this matches your app’s internal port
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://shopping-cart-db:5432/shopping_cart"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "abg@1234"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "10.213.26.12:9092"
+
+
+

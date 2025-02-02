@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopping-cart-db
+spec:
+  replicas: 1  # Only 1 database instance
+  selector:
+    matchLabels:
+      app: shopping-cart-db
+  template:
+    metadata:
+      labels:
+        app: shopping-cart-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15  # Use the latest stable PostgreSQL version
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "shopping_cart"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "abg@1234"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-storage
+          emptyDir: {}

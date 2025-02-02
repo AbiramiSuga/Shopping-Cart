@@ -25,6 +25,11 @@
     <logger name="org.shoppingcart" level="DEBUG"/>
     <logger name="org.hibernate.SQL" level="DEBUG"/>
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="INFO"/>
+    <logger name="org.apache.kafka" level="DEBUG"/>
+    <logger name="org.springframework.kafka" level="DEBUG"/>
+    <logger name="org.springframework.kafka.core" level="DEBUG"/>
+    <logger name="org.springframework.kafka.listener" level="DEBUG"/>
+    <logger name="org.springframework.kafka.producer" level="DEBUG"/>
 
     <!-- Root logger (logs to both console and file) -->
     <root level="INFO">
